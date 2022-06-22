@@ -9,7 +9,7 @@ function drawLineChart() {
           {
             scaleLabel: {
               display: true,
-              labelString: "gender"
+              labelString: "students number"
             }
           }
         ]
@@ -101,7 +101,7 @@ function drawBarChart() {
         labels: ["sciences","maths","Languages","arts"],
         datasets: [
           {
-            label: "# of Hits",
+            label: "subjects",
             data: [10,21,60,70],
             backgroundColor: [
               "#F7604D",

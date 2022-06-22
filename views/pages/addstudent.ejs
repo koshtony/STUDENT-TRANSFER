@@ -63,11 +63,20 @@
                 <a class="dropdown-item" href="#">admin info</a>
               </div>
             </li>
-            <li class="nav-item">
-              <a class="nav-link active" href="/student">
-                Query data
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+                  
+                  <span>
+                      Query Data
+                  </span>
               </a>
-            </li>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="/student">student data</a>
+                  <a class="dropdown-item" href="/school_res">School data</a>
+                  <a class="dropdown-item" href="#">General Changes</a>
+              </div>
+          </li>
 
             <li class="nav-item">
               <a class="nav-link active" href="accounts.html">
@@ -104,7 +113,9 @@
         </div>
       </div>
     </nav>
-   
+   <style>
+    
+   </style>
     <div class="container mt-5">
       <button type="button" style="margin-left:50px" onclick="performance()">Academics</button>
       <button type="button" onclick="health()">Health</button>
@@ -204,12 +215,12 @@
     <script>
      function check_inp(){
       var name = document.getElementById("name")
-      alert(name.value)
+      alert("Info submitted")
      }
      function performance(){
       const elem=document.getElementById("main");
       elem.innerHTML=`
-      <form method="POST",action="/student-health">
+      <form method="POST" onsubmit="check_inp();" action="/student-add">
         <input type="text" name="student" size="30" placeholder="student's name" required>
         <input type="text" name="studentid" size="30" placeholder="student's Id" required>
         <br><br>
@@ -226,7 +237,7 @@
      function health(){
       const elem=document.getElementById("main");
       elem.innerHTML=`
-      <form method="POST",action="/student-health">
+      <form method="POST" onsubmit="check_inp();" action="/student-add">
         <input type="text" id="name" name="hname" size="30" placeholder="First Name" size="50" width="50" required>
         <input type="text" name="hsname" size="30" placeholder="Sir Name" required>
         <br><br>
@@ -255,7 +266,7 @@
     function discipline(){
       const elem=document.getElementById("main");
       elem.innerHTML=`
-      <form method="POST",action="/student-health">
+      <form method="POST" onsubmit="check_inp();" action="/student-add">
         <input type="text" name="depuname" size="30" placeholder="Teacher Incharge First name" required>
         <input type="text" name="depusname" size="30" placeholder="Teacher Incharge Second name" required>
         <br><br>

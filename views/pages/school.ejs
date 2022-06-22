@@ -112,21 +112,21 @@
                 <thead>
                   <tr>
                     <h4 style="color:aqua">ADD SCHOOL INFO</h1>
-                  <form>
-                  <input type="text" id="sname" size="30" placeholder="school name" required>
-                  <input type="text" id="pname" size="30" placeholder="principal name" required>
+                  <form method="POST">
+                  <input type="text" name="sname" size="30" placeholder="school name" required>
+                  <input type="text" name="pname" size="30" placeholder="principal name" required>
                   <br><br>
-                  <input type="text" id="county" size="30" placeholder="county" required>
-                  <input type="text" id="district" size="30" placeholder="district" required>
+                  <input type="text" name="county" size="30" placeholder="county" required>
+                  <input type="text" name="district" size="30" placeholder="district" required>
                   <br> <br>
-                  <input type="text" id="vname" size="30" placeholder="village location" required>
-                  <input type="text" id="map" size="30" placeholder="Paste google link" required>
+                  <input type="text" name="vname" size="30" placeholder="village location" required>
+                  <input type="text" name="map" size="30" placeholder="Paste google link" required>
                   <br><br>
                   <label style="color:aqua">date of est</label>
-                  <input type="date" id="doe" size="30" placeholder="date of est" required>
+                  <input type="date" name="doe" size="30" placeholder="date of est" required>
                   &nbsp &nbsp &nbsp &nbsp &nbsp  
                   <label style="color:aqua">Principal join Date</label>
-                  <input type="date" id="pdj" size="30" placeholder="principal join date" required>
+                  <input type="date" name="pdj" size="30" placeholder="principal join date" required>
                   <br><br>
                   <textarea id="remarks" name="remarks" rows="7" cols="65" placeholder="Remarks"></textarea>
                   <input type="submit" value="submit" style="margin-left:250px">

@@ -5,6 +5,7 @@ const ip =require("ip")
 const path=require("path")
 const bodyParser=require("body-parser");
 const { resolve } = require("path");
+const { Console } = require("console");
 const app=express()
 app.set('view engine', 'ejs');
 function create_db(){
@@ -105,8 +106,8 @@ function insert_student(db,s_array){
 }
 function insert_school(db,sc_array){
     db.run(`
-    insert into schools(sid,name,principal,doc,county,district,village)
-    values(?,?,?,?,?,?,?)
+    insert into schools(sid,name,principal,doc,county,district,village,map,doe,pdj,remarks)
+    values(?,?,?,?,?,?,?,?,?,?,?)
     `,sc_array[0],sc_array[1],sc_array[2],sc_array[3],sc_array[4],sc_array[5]
     ,sc_array[6],sc_array[7],sc_array[8],sc_array[9],sc_array[10],(err)=>{
         if (err){
@@ -114,6 +115,16 @@ function insert_school(db,sc_array){
         }
     })
 }
+function insertPerf(db,pArray){
+    db.run(`insert into academic(sid,name,Transcript,Remarks)
+    VALUES(?,?,?,?)`,pArray[0],pArray[1],pArray[2],pArray[3],(err)=>{
+        if(err){
+            console.log(err)
+        }
+    }
+    )
+}
+
 /**function getData(db){
     db.all(`
         select *from students
@@ -134,15 +145,26 @@ function insert_school(db,sc_array){
 function trans_student(db){
     return 0;
 }
+function looper(body){
+    bodyArray=[];
+    for(const [key,value] of Object.entries(body)){
+         bodyArray.push(value);
+    }
+    return bodyArray;
+}
 app.use('/statics', express.static(path.join(__dirname,'statics')))
 app.use(bodyParser.urlencoded({
     extended: true
   }))
 app.get('/',(req,res)=>{
-    var name="tony";
-    res.render('pages/index',{name:name})
+    const db=create_db();
+    db.all(` select *from schools
+    `,(err,schools)=>{
+        res.render('pages/index',{schools:schools})
+    })
 })
 app.get('/student',(req,res)=>{
+    console.log(req.socket.remoteAddress)
     const db =create_db()
     db.all(` select *from students
     `,(err,rows)=>{
@@ -151,33 +173,73 @@ app.get('/student',(req,res)=>{
     )
 })
 app.post('/student',(req,res)=>{
-    console.log(req.body)
-    res.redirect('/student')
+    const db=create_db()
+    if(Object.keys(req.body)[0]=="student"){
+    db.all(`select *from students where (id=? or sid=?) or (parent_name=? or parent_sname=?) or (principal=?) or (dob>? and dob<?) or (doj>? and doj<?)
+    `,req.body.student,req.body.school,req.body.parent,req.body.parent,req.body.principal,req.body.dob1,req.body.dob2,req.body.dob1,req.body.dob2,(err,rows)=>{
+        res.render('pages/student',{rows:rows});
+    })
+} 
+})
+app.get('/school_res',(req,res)=>{
+    const db=create_db();
+    db.all(` select *from schools
+    `,(err,rows)=>{
+        res.render('pages/school_res',{rows:rows})
+    })
+
+})
+app.post('/school_res',(req,res)=>{
+    db.all(`select *from schools where sid=?
+    `,req.body.school,(err,rows)=>{
+        res.render('pages/school_res',{rows:rows});
+    })
 })
 app.get('/student-add',(req,res)=>{
     res.render('pages/addstudent');
 })
 app.post('/student-add',(req,res)=>
 {
+    const db=create_db();
     var info=[];
-    for (const [key,value] of Object.entries(req.body)){
-        info.push(value)
-    }
-    try{
-        if (info.length>15){
-            var db=create_db();
-            create_table(db);
-            insert_student(db,info);
-            res.redirect('/');
-        }else{
-            console.log(info)
+    var med=[];
+        if(Object.keys(req.body)[0]=="name"){
+            try{
+            insert_student(db,looper(req.body))
+            res.redirect('/student-add')
+            }catch(err){
+                console.log(err)
+            }
+        }else if (Object.keys(req.body)[0]=="student"){
+            insertPerf(db,looper(req.body));
+            console.log(looper(req.body));
+            
+        }else if(Object.keys(req.body)[0]=="hname"){
+            //insertHealth(db,looper(req.body));
+            console.log(looper(req.body))
+            
+        }else if(Object.keys(req.body)[0]=="depuname"){
+            //insertDisp(looper(req.body));
+            console.log(looper(req.body));
         }
-    }catch(err){
-        console.log("database error")
-    }
+  
 })
 app.get('/school',(req,res)=>{
     res.render('pages/school');
+})
+app.post('/school',(req,res)=>{
+    const db=create_db()
+    var school_info=[];
+    console.log(req.body)
+    for(const [key,value] of Object.entries(req.body)){
+        school_info.push(value);
+    }
+    try{
+    insert_school(db,school_info);
+    res.redirect('/');
+    }catch(err){
+        console.log(err);
+    }
 })
 const server=app.listen(3000,()=>{
     console.log(`Server running at ${ip.address()} port: ${server.address().port}`)

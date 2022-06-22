@@ -23,7 +23,7 @@
  
   </head>
 
-  <body id="reportsPage">
+  <body>
     <nav class="navbar navbar-expand-xl">
       <div class="container h-100">
 
@@ -65,11 +65,20 @@
                 <a class="dropdown-item" href="#">admin info</a>
               </div>
             </li>
-            <li class="nav-item">
-              <a class="nav-link active" href="/student">
-                Query data
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="false">
+                  
+                  <span>
+                      Query Data
+                  </span>
               </a>
-            </li>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="/student">student data</a>
+                  <a class="dropdown-item" href="/school_res">School data</a>
+                  <a class="dropdown-item" href="#">General Changes</a>
+              </div>
+          </li>
 
             <li class="nav-item">
               <a class="nav-link active" href="accounts.html">
@@ -105,7 +114,7 @@
         </div>
       </div>
     </nav>
-    <div class="container mt-5">
+    
       <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#filterStudent">filter student</button>
 <div class="modal fade" id="filterStudent" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -137,71 +146,49 @@
     </div>
   </div>
 </div>
-<button class="btn btn-primary" type="button" data-toggle="modal" data-target="#filterSchool">search school</button>
-<div class="modal fade" id="filterSchool" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalCenterTitle">search school</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form method="POST",action="/student">
-          <input type="text" name="school id" size="14" placeholder="school id" style="margin-left:17px">
-          <input type="text" name="county" size="13" placeholder="county">
-          <input type="text" name="district" size="13" placeholder="District">
-          <br><br>
-          <label>est</label>
-          <input type="date" name="est1" size="10"  style="width:210px">
-          <input type="date" name="est2" size="10"  style="width:210px">
-          <input type="submit" value="submit" style="margin-left:200px">
-  </form>
-      </div>
-      
-    </div>
-  </div>
-</div>
-<table class="table table-hover tm-table-small tm-product-table">
-    <thead>
-      <tr>
-        <th scope="col">&nbsp;</th>
-        <th scope="col">PRODUCT NAME</th>
-        <th scope="col">UNIT SOLD</th>
-        <th scope="col">IN STOCK</th>
-        <th scope="col">EXPIRE DATE</th>
-        <th scope="col">&nbsp;</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% rows.forEach((row)=>{%>}
-      <tr>
-        <th scope="row"><input type="checkbox" /></th>
-        <td class="tm-product-name">Lorem Ipsum Product 1</td>
-        <td><%= row.id %></td>
-        <td><%= row.first %></td>
-        <td><%= row.sir %></td>
-        <td>
-          <a href="#" class="tm-product-delete-link">
-            <i class="far fa-trash-alt tm-product-delete-icon"></i>
-          </a>
-        </td>
-      </tr>
-      <%}) %>
-    </tbody>
-  </table>
-</div>
 
-	
-	
-    </div>
-   
-    <footer class="tm-footer row tm-mt-small">
-      <div class="col-12 font-weight-light">
-      </div>
-    </footer>
-
+<div class="container mt-5">
+  <div class="row tm-content-row">
+    <div class="col-sm-12 col-md-12 col-lg-8 col-xl-8 tm-block-col">
+      <div class="tm-bg-primary-dark tm-block tm-block-products">
+        <div class="tm-product-table-container">
+          <table class="table table-hover tm-table-small tm-product-table" id="respTab">
+            <thead>
+              <tr>
+                
+                <th>student id</th>
+                <th>First name</th>
+                <th>Sir name</th>
+                <th>parent first name</th>
+                <th>parent second name</th>
+                <th>school name</th>
+                <th>school id</th>
+                <th>principal name</th>
+                <th>student location</th>
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% rows.forEach((row)=>{%>
+              <tr>
+                <td><%= row.id %></td>
+                <td><%= row.first %></td>
+                <td><%= row.sir %></td>
+                <td><%= row.parent_name %></td>
+                <td><%= row.parent_sname %></td>
+                <td><%= row.school %></td>
+                <td><%= row.sid %></td>
+                <td><%= row.principal %></td>
+                <td><%= row.student_location %></td>
+                <td><%= row.school_location %></td>
+                <td><%= row.county %></td>
+                <td><%= row.district %></td>
+                <td><%= row.dob %></td>
+              </tr>
+              <%}) %>
+            </tbody>
+          </table>
+        </div>
     <script src="/statics/jquery-3.3.1.min.js"></script>
     <!-- https://jquery.com/download/ -->
     <script src="/statics/bootstrap.min.js"></script>
@@ -212,7 +199,12 @@
           window.location.href = "edit-product.html";
         });
       });
-      
+      function tableLen(){
+        const table=getElementById("respTab");
+        if(table.rows.lenght==0){
+          table.innerhtml=`<h1>Empty results</h1>`
+        }
+      }
     </script>
   </body>
 </html>

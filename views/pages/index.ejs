@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>student transfer</title>
-    <h1><%= name %></h1>
+   
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700">
     <!-- https://fonts.google.com/specimen/Roboto -->
     <link rel="stylesheet" href="/statics/fontawesome.min.css">
@@ -50,11 +50,19 @@
                                 <a class="dropdown-item" href="/school">school info</a>
                             </div>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/student">
-                               Query data
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
                                 
+                                <span>
+                                    Query Data
+                                </span>
                             </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="/student">student data</a>
+                                <a class="dropdown-item" href="/school_res">School data</a>
+                                <a class="dropdown-item" href="#">General Changes</a>
+                            </div>
                         </li>
 
                         <li class="nav-item">
@@ -119,14 +127,12 @@
                 </div>
                 <div class="col-sm-12 col-md-12 col-lg-6 col-xl-6 tm-block-col">
                     <div class="tm-bg-primary-dark tm-block tm-block-taller tm-block-overflow">
-                        <h2 class="tm-block-title">Notification List</h2>
+                        <h2 class="tm-block-title">News</h2>
                         <div class="tm-notification-items">
                             <div class="media tm-notification-item">
-                                <div class="tm-gray-circle"><img src="img/notification-01.jpg" alt="Avatar Image" class="rounded-circle"></div>
+                            
                                 <div class="media-body">
-                                    <p class="mb-2"><b>Jessica</b> and <b>6 others</b> sent you new <a href="#"
-                                            class="tm-notification-link">product updates</a>. Check new orders.</p>
-                                    <span class="tm-small tm-text-color-secondary">6h ago.</span>
+                                 
                                 </div>
                             </div>
                         
@@ -137,6 +143,42 @@
                     <div class="tm-bg-primary-dark tm-block tm-block-taller tm-block-scroll">
                         <h2 class="tm-block-title">schools info</h2>
                         <table class="table">
+                            <thead>
+                                <tr>
+                                  
+                                  <th>school id</th>
+
+                                  <th>School name</th>
+                                  <th>principal</th>
+                                  <th>doc</th>
+                                  <th>county</th>
+                                  <th>district</th>
+                                  <th>village</th>
+                                  <th>map</th>
+                                  <th>doe</th>
+                                  <th>pdj</th>
+                                  <th>remarks</th>
+                                  <th>&nbsp;</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <% schools.forEach((school)=>{%>
+                                <tr>
+                                  <td><%= school.sid %></td>
+                                  <td><%= school.name %></td>
+                                  <td><%= school.principal %></td>
+                                  <td><%= school.doc %></td>
+                                  <td><%= school.county %></td>
+                                  <td><%= school.district %></td>
+                                  <td><%= school.village %></td>
+                                  <td><%= school.map %></td>
+                                  <td><%= school.doe %></td>
+                                  <td><%= school.pdj %></td>
+                                  <td><%= school.remarks %></td>
+                                
+                                </tr>
+                                <%}) %>
+                              </tbody>
                           
                         </table>
                     </div>
