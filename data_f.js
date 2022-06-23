@@ -190,8 +190,9 @@ app.get('/school_res',(req,res)=>{
 
 })
 app.post('/school_res',(req,res)=>{
-    db.all(`select *from schools where sid=?
-    `,req.body.school,(err,rows)=>{
+    const db=create_db()
+    db.all(`select *from schools where (sid=? or county=?) or (district=?) or (doe >=? and doe<=?)
+    `,req.body.school,req.body.county,req.body.district,req.body.est1,req.body.est2,(err,rows)=>{
         res.render('pages/school_res',{rows:rows});
     })
 })
