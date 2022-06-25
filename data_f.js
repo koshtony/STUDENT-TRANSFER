@@ -10,11 +10,12 @@ const app=express()
 app.set('view engine', 'ejs');
 function create_db(){
 var db = new sq.Database('data.db',(err)=>{
-    if(err){np
+    if(err){
         console.log(err)
     }else{
-        return db
+        return db;
     }
+    
 });
 return db;
 }
@@ -33,9 +34,6 @@ function create_table(db){
             pdj date,
             remarks text
         );
-        `
-        );
-        db.exec(`
         create table if not exists students(
             id int primary key,
             first text,
@@ -59,42 +57,44 @@ function create_table(db){
             remarks text,
             FOREIGN KEY (sid) REFERENCES schools(sid)
         );
-         `
-        );
-    db.exec(
-        `create if not exists academic(
+        create table if not exists academic(
             sid int primary key,
             name text,
+            marks text,
+            Grade text,
             Transcript blob,
-            Remarks text
-        );`
-    );
-    db.exec(
-        `create if not exists health(
+            Remarks text,
+            FOREIGN KEY (sid) REFERENCES students(id)
+        );
+   
+        create table if not exists health(
             sid int primary key,
             first_name text,
             second_name text,
             doctor_fname text,
             doctor_sname text,
             hispital text,
-            hospital level,
+            hospital_level text,
             gender text,
-            age,
+            age int,
             medical_report blob,
-            remarks text
-        );`
-    )
-   db.exec(
-    `create if not exists discipline(
+            remarks text,
+            FOREIGN KEY (sid) REFERENCES students(id)
+        );
+    create table if not exists discipline(
+        sid int primary key,
+        school_id int,
         Teacher_fname text,
         Teacher_sname text,
         report text,
-        remarks
+        remarks text,
+        FOREIGN KEY (sid) REFERENCES students(id)
     );
    `
 
-   )
+   );
 }
+
 function insert_student(db,s_array){
     db.run(`
     insert into students(id,first,sir,parent_name,parent_sname ,school,sid,principal,student_location,
@@ -116,34 +116,21 @@ function insert_school(db,sc_array){
     })
 }
 function insertPerf(db,pArray){
-    db.run(`insert into academic(sid,name,Transcript,Remarks)
-    VALUES(?,?,?,?)`,pArray[0],pArray[1],pArray[2],pArray[3],(err)=>{
+    db.run(`insert into academic(sid,name,marks,Grade,Transcript,Remarks)
+    VALUES(?,?,?,?,?,?)`,pArray[0],pArray[1],pArray[2],pArray[3],pArray[4],pArray[5],(err)=>{
         if(err){
             console.log(err)
         }
     }
     )
 }
-
-/**function getData(db){
-    db.all(`
-        select *from students
-    `,(err,rows)=>{
-        if(err){
-            console.log(err)
-        }else{
-            var data=[]
-            rows.forEach(row=>{
-                console.log(row.id)
-            
-            })
-        }
-    })
-    
+function insertHealth(db,hArray){
+    db.run(`insert into health (sid,first_name,second_name,doctor_fname,doctor_sname,hispital,gender,age,medical_report,remarks)
+    values(?,?,?,?,?,?,?,?,?,?) `,hArray[0],hArray[1],hArray[2],hArray[3],hArray[4],hArray[5],hArray[6],hArray[7],hArray[8],hArray[9])
 }
-**/
-function trans_student(db){
-    return 0;
+function insertDisp(db,dArray){
+    db.run(`insert into discipline(sid,school_id,Teacher_fname,Teacher_sname,report,remarks)
+    values(?,?,?,?,?,?)`,dArray[0],dArray[1],dArray[2],dArray[3],dArray[4],dArray[5])
 }
 function looper(body){
     bodyArray=[];
@@ -158,17 +145,21 @@ app.use(bodyParser.urlencoded({
   }))
 app.get('/',(req,res)=>{
     const db=create_db();
+    create_table(db)
     db.all(` select *from schools
     `,(err,schools)=>{
         res.render('pages/index',{schools:schools})
     })
+
+
 })
 app.get('/student',(req,res)=>{
     console.log(req.socket.remoteAddress)
     const db =create_db()
-    db.all(` select *from students
+    db.all(` select *from students s join academic c on s.sid=c.sid
     `,(err,rows)=>{
             res.render('pages/student',{rows:rows});
+            
     }
     )
 })
@@ -179,7 +170,24 @@ app.post('/student',(req,res)=>{
     `,req.body.student,req.body.school,req.body.parent,req.body.parent,req.body.principal,req.body.dob1,req.body.dob2,req.body.dob1,req.body.dob2,(err,rows)=>{
         res.render('pages/student',{rows:rows});
     })
-} 
+   }else if(Object.keys(req.body)[0]=="studentA"){
+        db.all(`select *from academic where (sid=? or name=?)
+        `,req.body.studentA,req.body.studentName,(err,rows)=>{
+            console.log(req.body)
+            res.render('pages/academic',{rows:rows})
+            
+        }
+
+        )
+    }else if(Object.keys(req.body)[0]=="hsid"){
+        db.all(`
+        select *from health where sid=? or (first_name=? or second_name=?) or (doctor_fname=? or doctor_sname=?) or (hispital=?) 
+        `,req.body.hsid,req.body.paname,req.body.paname,req.body.dname,req.body.dname,req.body.hospital,(err,rows)=>{
+            console.log(req.body)
+            res.render('pages/health',{rows:rows})
+        })
+    }
+ 
 })
 app.get('/school_res',(req,res)=>{
     const db=create_db();
@@ -202,8 +210,7 @@ app.get('/student-add',(req,res)=>{
 app.post('/student-add',(req,res)=>
 {
     const db=create_db();
-    var info=[];
-    var med=[];
+
         if(Object.keys(req.body)[0]=="name"){
             try{
             insert_student(db,looper(req.body))
@@ -213,15 +220,15 @@ app.post('/student-add',(req,res)=>
             }
         }else if (Object.keys(req.body)[0]=="student"){
             insertPerf(db,looper(req.body));
-            console.log(looper(req.body));
+            res.redirect('/student-add');
             
         }else if(Object.keys(req.body)[0]=="hname"){
-            //insertHealth(db,looper(req.body));
-            console.log(looper(req.body))
+            insertHealth(db,looper(req.body));
+            res.redirect('/student-add')
             
-        }else if(Object.keys(req.body)[0]=="depuname"){
-            //insertDisp(looper(req.body));
-            console.log(looper(req.body));
+        }else{
+            insertDisp(db,looper(req.body));
+            res.redirect('/student-add')
         }
   
 })

@@ -117,17 +117,17 @@
     </nav>
   
     <button class="btn btn-primary" type="button" style="background-color: blue; margin-left: 200px;" data-toggle="modal" data-target="#filterStudent">filter student</button>
-    <button class="btn btn-primary" type="button" style="background-color: green; button" onclick="academic();">Academic</button>
-    <button class="btn btn-primary" type="button" style="background-color: brown;" onclick="window.location.href='/student';">Health</button>
-    <button class="btn btn-primary" type="button" style="background-color: aqua;" onclick="window.location.href='/student';">Disciplinary</button>
+    <button class="btn btn-primary" type="button" style="background-color: green;" data-toggle="modal" data-target="#filterAcademic" >Academic</button>
+    <button class="btn btn-primary" type="button" style="background-color: brown;" data-toggle="modal" data-target="#filterHealth">Health</button>
+    <button class="btn btn-primary" type="button" style="background-color: aqua;" onclick="displine();">Disciplinary</button>
     &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp 
     &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp 
     &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp 
-   
+
     
     <button class="btn btn-primary" type="button" style="background-color:grey;" onclick="window.location.href='/student';">refresh</button>
     <button class="btn btn-primary" type="button" style="background-color: black;" onclick="window.location.href='/student';">Export</button>
-<div class="modal fade" id="filterStudent" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+<div class="modal fade" id="filterStudent" tabindex="-1" data-keyboard="false" data-backdrop="static" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -157,6 +157,53 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="filterAcademic" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">search student</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        
+        <form method="POST",action="/student">
+          <input type="text" name="studentA" size="14" placeholder="student id">
+          <input type="text" name="school" size="14" placeholder="school id">
+          <input type="text" name="principal" size="14" placeholder="principal">
+          <br><br>
+          <input type="text" name="grade" size="24" placeholder="grade">
+          <input type="text" name="marks" size="23" placeholder="marks">
+         <br><br>
+          <input type="submit" value="submit" style="margin-left:200px">
+  </form>
+      </div>
+      
+    </div>
+  </div>
+  <div class="modal fade" id="filterHealth" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalCenterTitle">search student</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+          
+          <form method="POST" action="/student">
+            <input type="text" name="hsid" size="14" placeholder="student id">
+            <input type="text" name="paname" size="14" placeholder="student name">
+            <input type="text" name="dname" size="14" placeholder="doctor name">
+            <br><br>
+            <input type="text" name="hospital" size="24" placeholder="hospital name">
+           <br><br>
+            <input type="submit" value="submit" style="margin-left:200px">
+    </form>
+        </div>
+        
+      </div>
+    </div>
 
 <div class="container mt-5">
   <div class="row tm-content-row">
@@ -216,65 +263,8 @@
           table.innerhtml=`<h1>Empty results</h1>`
         }
       }
-      function academic(){
-        const elem=document.getElementById("respTab");
-        elem.innerHTML=`
-        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#filterAcademic">filter student</button>
-        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#filterAcademicSchool">filter school</button>
-        &nbsp &nbsp &nbsp &nbsp &nbsp
-        &nbsp &nbsp &nbsp &nbsp &nbsp
-        &nbsp &nbsp &nbsp &nbsp &nbsp
-        <button class="btn btn-primary" type="button" onclick="window.location.href='/student';">Refresh
-          </button>
-    <button class="btn btn-primary" type="button" onclick="window.location.href='/student';">Export</button>
-        <div class="modal fade" id="filterAcademic" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalCenterTitle">search student</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form method="POST",action="/student">
-          <input type="text" name="student" size="10" placeholder="student id">
-          <input type="text" name="school" size="10" placeholder="school id">
-          <input type="text" name="parent" size="10" placeholder="parent">
-          <input type="text" name="principal" size="10" placeholder="principal">
-  </form>
-      </div>
-      
-    </div>
-  </div>
-</div>
-<div class="modal fade" id="filterAcademicSchool" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalCenterTitle">search school</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form method="POST",action="/student">
-          <input type="text" name="school" size="14" placeholder="school id">
-          <input type="text" name="schoolName" size="14" placeholder="school name">
-          <input type="text" name="principal" size="15" placeholder="principal">
-          <br><br>
-          <label>est</label>
-          <input type="date" name="doe1" size="10"  style="width:210px">
-          <input type="date" name="doe2" size="10"  style="width:210px">
-  </form>
-      </div>
-      
-    </div>
-  </div>
-</div>
-  
-        `
-      }
+     
+
     </script>
   </body>
 </html>
