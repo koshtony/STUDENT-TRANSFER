@@ -186,6 +186,13 @@ app.post('/student',(req,res)=>{
             console.log(req.body)
             res.render('pages/health',{rows:rows})
         })
+    }else if (Object.keys(req.body)[0]=="dsid"){
+        db.all(`
+        select *from discipline where (sid=? or school_id=?) or (Teacher_fname=? or Teacher_sname=?)
+        `,req.body.dsid,req.body.schoolid,req.body.deputy,req.body.deputy,(err,rows)=>{
+        res.render('pages/disp',{rows:rows})
+        })
+        
     }
  
 })
