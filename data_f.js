@@ -8,6 +8,7 @@ const { resolve } = require("path");
 const { Console } = require("console");
 const app=express()
 app.set('view engine', 'ejs');
+// creating general database
 function create_db(){
 var db = new sq.Database('data.db',(err)=>{
     if(err){
@@ -19,6 +20,7 @@ var db = new sq.Database('data.db',(err)=>{
 });
 return db;
 }
+// creating all the needed tables.
 function create_table(db){
     db.exec(
         `create table if not exists schools(
@@ -90,11 +92,19 @@ function create_table(db){
         remarks text,
         FOREIGN KEY (sid) REFERENCES students(id)
     );
+    create table if not exists transfers(
+        sid int,
+        from int,
+        to int,
+        created date,
+        admin text,
+        remark text
+    )
    `
 
    );
 }
-
+// adding data to relevant tables
 function insert_student(db,s_array){
     db.run(`
     insert into students(id,first,sir,parent_name,parent_sname ,school,sid,principal,student_location,
@@ -143,26 +153,29 @@ app.use('/statics', express.static(path.join(__dirname,'statics')))
 app.use(bodyParser.urlencoded({
     extended: true
   }))
+// index/ home page route
 app.get('/',(req,res)=>{
     const db=create_db();
-    create_table(db)
+    //create_table(db)
+    ips=req.socket.remoteAddress.split(':').pop()
     db.all(` select *from schools
     `,(err,schools)=>{
-        res.render('pages/index',{schools:schools})
+        res.render('pages/index',{schools:schools,ips:ips})
     })
 
 
 })
+// query/data retrieval page route
 app.get('/student',(req,res)=>{
-    console.log(req.socket.remoteAddress)
     const db =create_db()
     db.all(` select *from students s join academic c on s.sid=c.sid
     `,(err,rows)=>{
-            res.render('pages/student',{rows:rows});
+            res.render('pages/student',{rows:rows,ips:ips});
             
     }
     )
 })
+// student search data input route
 app.post('/student',(req,res)=>{
     const db=create_db()
     if(Object.keys(req.body)[0]=="student"){
@@ -196,6 +209,7 @@ app.post('/student',(req,res)=>{
     }
  
 })
+// school data query route
 app.get('/school_res',(req,res)=>{
     const db=create_db();
     db.all(` select *from schools
@@ -204,6 +218,7 @@ app.get('/school_res',(req,res)=>{
     })
 
 })
+// school search data route
 app.post('/school_res',(req,res)=>{
     const db=create_db()
     db.all(`select *from schools where (sid=? or county=?) or (district=?) or (doe >=? and doe<=?)
@@ -211,6 +226,7 @@ app.post('/school_res',(req,res)=>{
         res.render('pages/school_res',{rows:rows});
     })
 })
+// student data form page route
 app.get('/student-add',(req,res)=>{
     res.render('pages/addstudent');
 })
@@ -239,6 +255,7 @@ app.post('/student-add',(req,res)=>
         }
   
 })
+// adding school info page 
 app.get('/school',(req,res)=>{
     res.render('pages/school');
 })
@@ -255,6 +272,20 @@ app.post('/school',(req,res)=>{
     }catch(err){
         console.log(err);
     }
+})
+// transfer input form page
+app.get('/transfers',(req,res)=>{
+    res.render('pages/transfers')
+})
+app.post('/transfers',(req,res)=>{
+   if(Object.keys(req.body)[3]=="remarks"){
+    // insert to transfer database
+    console.log("insert")
+   }else{
+    // search and display
+    console.log("search")
+   }
+   res.redirect('/transfers')
 })
 const server=app.listen(3000,()=>{
     console.log(`Server running at ${ip.address()} port: ${server.address().port}`)
