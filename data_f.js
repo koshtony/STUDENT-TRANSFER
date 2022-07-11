@@ -152,6 +152,7 @@ function insertTrans(db,tArray){
 db.run(`insert into transfers(sid,previous,current,created,createdby,remark) values(?,?,?,?,?,?)`,
 tArray[0],tArray[1],tArray[2],tArray[3],tArray[4],tArray[5]
 )
+db.run(`update student set sid=? where id=?`,tArray[2],tArray[0]);
 }
 function looper(body){
     bodyArray=[];
@@ -190,7 +191,7 @@ app.get('/',(req,res)=>{
     create_table(db) //table creator
     ips=req.socket.remoteAddress.split(':').pop().toString()
     var geo = geoip.lookup(ips);
-    db.all(` select *from schools s join students st on s.sid=st.id
+    db.all(` select *from schools
     `,(err,schools)=>{
         console.log(schools)
         res.render('pages/index',{schools:schools,ips:ips})
