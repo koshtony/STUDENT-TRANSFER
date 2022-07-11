@@ -1,6 +1,6 @@
 const width_threshold = 480;
 
-function drawLineChart() {
+function drawLineChart(data) {
   if ($("#lineChart").length) {
     ctxLine = document.getElementById("lineChart").getContext("2d");
     optionsLine = {
@@ -23,19 +23,11 @@ function drawLineChart() {
     configLine = {
       type: "line",
       data: {
-        labels: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July"
-        ],
+        labels:data,
         datasets: [
           {
             label: "male",
-            data: [10,21,60,44,17,21,17],
+            data: [10,11],
             fill: false,
             borderColor: "rgb(75, 192, 192)",
             cubicInterpolationMode: "monotone",
@@ -43,7 +35,7 @@ function drawLineChart() {
           },
           {
             label: "female",
-            data: [33, 45, 37, 21, 55, 74, 69],
+            data: [33,11],
             fill: false,
             borderColor: "rgba(255,99,132,1)",
             cubicInterpolationMode: "monotone",

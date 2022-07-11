@@ -3,9 +3,13 @@ var sq = require("sqlite3");
 const express=require("express");
 const ip =require("ip")
 const path=require("path")
+var geoip = require('geoip-lite');
 const bodyParser=require("body-parser");
+const nodeCache = require('node-cache')
+const queryCache = new nodeCache()
 const { resolve } = require("path");
-const { Console } = require("console");
+const { Console, table } = require("console");
+var objectCsv=require("objects-to-csv")
 const app=express()
 app.set('view engine', 'ejs');
 // creating general database
@@ -93,13 +97,14 @@ function create_table(db){
         FOREIGN KEY (sid) REFERENCES students(id)
     );
     create table if not exists transfers(
-        sid int,
-        from int,
-        to int,
+        sid int primary key,
+        previous text,
+        current text,
         created date,
-        admin text,
-        remark text
-    )
+        createdby text,
+        remark text,
+        FOREIGN KEY (sid) REFERENCES students(id)
+    );
    `
 
    );
@@ -142,6 +147,12 @@ function insertDisp(db,dArray){
     db.run(`insert into discipline(sid,school_id,Teacher_fname,Teacher_sname,report,remarks)
     values(?,?,?,?,?,?)`,dArray[0],dArray[1],dArray[2],dArray[3],dArray[4],dArray[5])
 }
+// adding transfers requested to database
+function insertTrans(db,tArray){
+db.run(`insert into transfers(sid,previous,current,created,createdby,remark) values(?,?,?,?,?,?)`,
+tArray[0],tArray[1],tArray[2],tArray[3],tArray[4],tArray[5]
+)
+}
 function looper(body){
     bodyArray=[];
     for(const [key,value] of Object.entries(body)){
@@ -149,6 +160,26 @@ function looper(body){
     }
     return bodyArray;
 }
+function shifter(arr,index,element){
+    if(index<=arr.length && index>=0){
+        for(var i=arr.length;i>index;i--){
+            arr[i]=arr[i-1];  
+        }
+        arr[index]=element;
+    }
+    return arr
+
+}
+async function toCsv(data,filename){
+    const csvData=new objectCsv(data);
+    await csvData.toDisk(filename);
+}
+
+/**
+function numerate(){
+    const db=create_db()
+}
+**/
 app.use('/statics', express.static(path.join(__dirname,'statics')))
 app.use(bodyParser.urlencoded({
     extended: true
@@ -156,10 +187,12 @@ app.use(bodyParser.urlencoded({
 // index/ home page route
 app.get('/',(req,res)=>{
     const db=create_db();
-    //create_table(db)
-    ips=req.socket.remoteAddress.split(':').pop()
-    db.all(` select *from schools
+    create_table(db) //table creator
+    ips=req.socket.remoteAddress.split(':').pop().toString()
+    var geo = geoip.lookup(ips);
+    db.all(` select *from schools s join students st on s.sid=st.id
     `,(err,schools)=>{
+        console.log(schools)
         res.render('pages/index',{schools:schools,ips:ips})
     })
 
@@ -168,9 +201,10 @@ app.get('/',(req,res)=>{
 // query/data retrieval page route
 app.get('/student',(req,res)=>{
     const db =create_db()
-    db.all(` select *from students s join academic c on s.sid=c.sid
+    db.all(` select *from students
     `,(err,rows)=>{
-            res.render('pages/student',{rows:rows,ips:ips});
+        toCsv(rows,"./student_info.csv")
+            res.render('pages/student',{rows:rows});
             
     }
     )
@@ -181,12 +215,13 @@ app.post('/student',(req,res)=>{
     if(Object.keys(req.body)[0]=="student"){
     db.all(`select *from students where (id=? or sid=?) or (parent_name=? or parent_sname=?) or (principal=?) or (dob>? and dob<?) or (doj>? and doj<?)
     `,req.body.student,req.body.school,req.body.parent,req.body.parent,req.body.principal,req.body.dob1,req.body.dob2,req.body.dob1,req.body.dob2,(err,rows)=>{
+        toCsv(rows,"/student_info.csv")
         res.render('pages/student',{rows:rows});
     })
    }else if(Object.keys(req.body)[0]=="studentA"){
         db.all(`select *from academic where (sid=? or name=?)
         `,req.body.studentA,req.body.studentName,(err,rows)=>{
-            console.log(req.body)
+            toCsv(rows,"/student_info.csv")
             res.render('pages/academic',{rows:rows})
             
         }
@@ -196,13 +231,14 @@ app.post('/student',(req,res)=>{
         db.all(`
         select *from health where sid=? or (first_name=? or second_name=?) or (doctor_fname=? or doctor_sname=?) or (hispital=?) 
         `,req.body.hsid,req.body.paname,req.body.paname,req.body.dname,req.body.dname,req.body.hospital,(err,rows)=>{
-            console.log(req.body)
+            toCsv(rows,"/student_info.csv")
             res.render('pages/health',{rows:rows})
         })
     }else if (Object.keys(req.body)[0]=="dsid"){
         db.all(`
         select *from discipline where (sid=? or school_id=?) or (Teacher_fname=? or Teacher_sname=?)
         `,req.body.dsid,req.body.schoolid,req.body.deputy,req.body.deputy,(err,rows)=>{
+        toCsv(rows,"/student_info.csv")
         res.render('pages/disp',{rows:rows})
         })
         
@@ -214,6 +250,7 @@ app.get('/school_res',(req,res)=>{
     const db=create_db();
     db.all(` select *from schools
     `,(err,rows)=>{
+        toCsv(rows,"./schools.csv")
         res.render('pages/school_res',{rows:rows})
     })
 
@@ -223,6 +260,7 @@ app.post('/school_res',(req,res)=>{
     const db=create_db()
     db.all(`select *from schools where (sid=? or county=?) or (district=?) or (doe >=? and doe<=?)
     `,req.body.school,req.body.county,req.body.district,req.body.est1,req.body.est2,(err,rows)=>{
+        toCsv(rows,"./schools.csv")
         res.render('pages/school_res',{rows:rows});
     })
 })
@@ -230,14 +268,19 @@ app.post('/school_res',(req,res)=>{
 app.get('/student-add',(req,res)=>{
     res.render('pages/addstudent');
 })
+// adding student input data into the database.
 app.post('/student-add',(req,res)=>
 {
     const db=create_db();
 
         if(Object.keys(req.body)[0]=="name"){
+            var now=Date.now()
+            var fullDate=new Date(now);
+            var setId=fullDate.getFullYear() + fullDate.getMonth() + fullDate.getDate();
+            //console.log(looper(req.body))
             try{
-            insert_student(db,looper(req.body))
-            res.redirect('/student-add')
+            insert_student(db,[parseInt(setId)].concat(looper(req.body)));
+            res.redirect('/student-add');
             }catch(err){
                 console.log(err)
             }
@@ -247,11 +290,11 @@ app.post('/student-add',(req,res)=>
             
         }else if(Object.keys(req.body)[0]=="hname"){
             insertHealth(db,looper(req.body));
-            res.redirect('/student-add')
+            res.redirect('/student-add');
             
         }else{
             insertDisp(db,looper(req.body));
-            res.redirect('/student-add')
+            res.redirect('/student-add');
         }
   
 })
@@ -262,30 +305,65 @@ app.get('/school',(req,res)=>{
 app.post('/school',(req,res)=>{
     const db=create_db()
     var school_info=[];
-    console.log(req.body)
+    var now=Date.now()
+    var fullDate=new Date(now);
+    var doe=fullDate.getFullYear() + ":" + fullDate.getMonth() + ":"+ fullDate.getDate();
+    console.log(doe)
     for(const [key,value] of Object.entries(req.body)){
         school_info.push(value);
     }
+
     try{
-    insert_school(db,school_info);
-    res.redirect('/');
+        insert_school(db,shifter(school_info,3,doe));
+        res.redirect('/');
     }catch(err){
         console.log(err);
     }
 })
 // transfer input form page
 app.get('/transfers',(req,res)=>{
-    res.render('pages/transfers')
+    db=create_db()
+    if (queryCache.has('transfers')){
+    res.render('pages/transfers',{rows:queryCache.get('transfers')});
+    }else{
+        db.all(`select *from transfers`,(err,rows)=>{
+            queryCache.set('transfers',rows)
+            res.render('pages/transfers',{rows:rows})
+        })
+
+    }
+    
 })
 app.post('/transfers',(req,res)=>{
+    const db=create_db();
+    console.log(req.body)
    if(Object.keys(req.body)[3]=="remarks"){
-    // insert to transfer database
-    console.log("insert")
+    insertTrans(db,looper(req.body));
+    res.redirect('/transfers');
    }else{
-    // search and display
+    db.all(`select *from transfers where (sid=? or previous=?) or (current=?) or (sid=? and previous=?) and (current=?)`,
+    req.body.sids,req.body.from,req.body.to,req.body.sids,req.body.from,req.body.to,(err,rows)=>{
+        res.render('pages/transfers',{rows:rows});
+    }
+    )
     console.log("search")
    }
-   res.redirect('/transfers')
+   
+})
+// school data download link 
+app.get("/school_download",(req,res)=>{
+    res.download(__dirname+'/schools.csv',(err)=>{
+        if(err){
+            console.log("file not found")
+        }
+    })
+})
+app.get("/student_download",(req,res)=>{
+    res.download(__dirname+"/student_info.csv",(err)=>{
+        if(err){
+            console.log("file not found");
+        }
+    })
 })
 const server=app.listen(3000,()=>{
     console.log(`Server running at ${ip.address()} port: ${server.address().port}`)
