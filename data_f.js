@@ -342,12 +342,20 @@ app.post('/transfers',(req,res)=>{
     insertTrans(db,looper(req.body));
     res.redirect('/transfers');
    }else{
+    var rows=[];
+    for(var i=0;i<req.body.sids.split(" ").length;i++){
+        for (var j=0;j<req.body.from.split(" ").length;j++){
+            for (var k=0;k<req.body.to.split(" ").length;k++){
     db.all(`select *from transfers where (sid=? or previous=?) or (current=?) or (sid=? and previous=?) and (current=?)`,
-    req.body.sids,req.body.from,req.body.to,req.body.sids,req.body.from,req.body.to,(err,rows)=>{
-        res.render('pages/transfers',{rows:rows});
+    parseInt(req.body.sids.split(" ")[i]),req.body.from.split(" ")[j],req.body.to.split(" ")[k],parseInt(req.body.sids.split(" ")[i]),req.body.from.split(" ")[j],req.body.to.split(" ")[k],(err,rows)=>{
+        res.render('pages/transfers',{rows:rows})
+    })
+}
+}
     }
-    )
-    console.log("search")
+    console.log(rows)
+    res.render('pages/transfers',{rows:rows});
+
    }
    
 })
